@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: editor/ui.js</title>
+    <title>JSDoc: Source: models/markup.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: editor/ui.js</h1>
+    <h1 class="page-title">Source: models/markup.js</h1>
 
     
 
@@ -26,72 +26,84 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @module UI
- */
+            <pre class="prettyprint source linenums"><code>import { normalizeTagName } from '../utils/dom-utils';
+import { filterObject } from '../utils/array-utils';
+import { MARKUP_TYPE } from './types';
+import assert from '../utils/assert';
+
+export const VALID_MARKUP_TAGNAMES = [
+  'a',
+  'b',
+  'code',
+  'em',
+  'i',
+  's',   // strikethrough
+  'strong',
+  'sub', // subscript
+  'sup', // superscript
+  'u'
+].map(normalizeTagName);
+
+export const VALID_ATTRIBUTES = [
+  'href',
+  'rel'
+];
 
 /**
- * @callback promptCallback
- * @param {String} url The URL to pass back to the editor for linking
- *        to the selected text.
+ * A Markup is similar with an inline HTML tag that might be added to
+ * text to modify its meaning and/or display. Examples of types of markup
+ * that could be added are bold ('b'), italic ('i'), strikethrough ('s'), and `a` tags (links).
+ * @property {String} tagName
  */
+class Markup {
+  /*
+   * @param {Object} attributes key-values
+   */
+  constructor(tagName, attributes={}) {
+    this.tagName = normalizeTagName(tagName);
 
-/**
- * @callback showPrompt
- * @param {String} message The text of the prompt.
- * @param {String} defaultValue The initial URL to display in the prompt.
- * @param {module:UI~promptCallback} callback Once your handler has accepted a URL,
- *        it should pass it to `callback` so that the editor may link the
- *        selected text.
- */
+    assert('Must use attributes object param (not array) for Markup',
+           !Array.isArray(attributes));
 
-/**
- * Exposes the core behavior for linking and unlinking text, and allows for
- * customization of the URL input handler.
- * @param {Editor} editor An editor instance to operate on. If a range is selected,
- *        either prompt for a URL and add a link or un-link the
- *        currently linked text.
- * @param {module:UI~showPrompt} [showPrompt] An optional custom input handler. Defaults
- *        to using `window.prompt`.
- * @example
- * let myPrompt = (message, defaultURL, promptCallback) => {
- *   let url = window.prompt("Overriding the defaults", "http://placekitten.com");
- *   promptCallback(url);
- * };
- *
- * editor.registerKeyCommand({
- *   str: "META+K",
- *   run(editor) {
- *     toggleLink(editor, myPrompt);
- *   }
- * });
- * @public
- */
+    this.attributes = filterObject(attributes, VALID_ATTRIBUTES);
+    this.type = MARKUP_TYPE;
 
-let defaultShowPrompt = (message, defaultValue, callback) => callback(window.prompt(message, defaultValue));
-
-export function toggleLink(editor, showPrompt=defaultShowPrompt) {
-  if (editor.range.isCollapsed) {
-    return;
+    assert(`Cannot create markup of tagName ${tagName}`,
+           VALID_MARKUP_TAGNAMES.indexOf(this.tagName) !== -1);
   }
 
-  let selectedText = editor.cursor.selectedText();
-  let defaultUrl = '';
-  if (selectedText.indexOf('http') !== -1) { defaultUrl = selectedText; }
+  /**
+   * Whether text in the forward direction of the cursor (i.e. to the right in ltr text)
+   * should be considered to have this markup applied to it.
+   * @private
+   */
+  isForwardInclusive() {
+    return this.tagName === normalizeTagName("a") ? false : true;
+  }
 
-  let {range} = editor;
-  let hasLink = editor.detectMarkupInRange(range, 'a');
+  isBackwardInclusive() {
+    return false;
+  }
 
-  if (hasLink) {
-    editor.toggleMarkup('a');
-  } else {
-    showPrompt('Enter a URL', defaultUrl, url => {
-      if (!url) { return; }
+  hasTag(tagName) {
+    return this.tagName === normalizeTagName(tagName);
+  }
 
-      editor.toggleMarkup('a', {href: url});
-    });
+  /**
+   * Returns the attribute value
+   * @param {String} name, e.g. "href"
+   */
+  getAttribute(name) {
+    return this.attributes[name];
+  }
+
+  static isValidElement(element) {
+    const tagName = normalizeTagName(element.tagName);
+    return VALID_MARKUP_TAGNAMES.indexOf(tagName) !== -1;
   }
 }
+
+export default Markup;
 </code></pre>
         </article>
     </section>

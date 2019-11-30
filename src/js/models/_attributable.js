@@ -2,7 +2,8 @@ import { entries } from '../utils/object-utils';
 import { contains } from '../utils/array-utils';
 
 export const VALID_ATTRIBUTES = [
-  'data-md-text-align'
+  'data-md-text-align',
+  'data-comments-group-id'
 ];
 
 /*

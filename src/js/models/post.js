@@ -64,14 +64,15 @@ class Post {
   }
 
   /**
-   * If the post has no sections, or only has one, blank section, then it does
+   * If the post has no sections, or only has one and it is paragraph, blank section, then it does
    * not have content and this method returns false. Otherwise it is true.
    * @return {Boolean}
    * @public
    */
   get hasContent() {
-    if ((this.sections.length > 1) ||
-        (this.sections.length === 1 && !this.sections.head.isBlank)) {
+    const { length, head } = this.sections;
+
+    if ((length > 1) || (length === 1 && (head.tagName !== 'p' || !head.isBlank))) {
       return true;
     } else {
       return false;

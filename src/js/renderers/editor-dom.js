@@ -119,14 +119,26 @@ function renderInlineCursorPlaceholder() {
   return document.createTextNode(ZWNJ);
 }
 
+function renderZWNJElement() {
+  const placeholder = document.createElement('div');
+  placeholder.appendChild(renderInlineCursorPlaceholder());
+  placeholder.classList.add('zwnj');
+
+  return placeholder;
+}
+
 function renderCard() {
   let wrapper = document.createElement('div');
+  wrapper.classList.add('__mobiledoc-card-wrapper');
+
   let cardElement = document.createElement('div');
   cardElement.contentEditable = false;
+
   addClassName(cardElement, CARD_ELEMENT_CLASS_NAME);
-  wrapper.appendChild(renderInlineCursorPlaceholder());
+
   wrapper.appendChild(cardElement);
-  wrapper.appendChild(renderInlineCursorPlaceholder());
+  wrapper.appendChild(renderZWNJElement());
+
   return { wrapper, cardElement };
 }
 

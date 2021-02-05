@@ -1140,6 +1140,7 @@ class Editor {
   runCallbacks(...args) {
     if (this.isDestroyed) {
       // TODO warn that callback attempted after editor was destroyed
+      console.warn(`Attempted to run ${arguments[0]} callback on destroyed Editor`);  // eslint-disable-line no-console
       return;
     }
     this._callbacks.runCallbacks(...args);

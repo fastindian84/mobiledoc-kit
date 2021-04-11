@@ -37,7 +37,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "mobiledoc-dom-renderer": "0.7.0",
+    "mobiledoc-dom-renderer": "github:fastindian84/mobiledoc-dom-renderer",
     "mobiledoc-text-renderer": "0.4.0"
   },
   "devDependencies": {
